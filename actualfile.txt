@@ -1,0 +1,97 @@
+
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Scanner;
+
+
+
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+		Scanner s = new Scanner(System.in);
+
+		System.out.println("Option: ");
+		System.out.println("1. Compress the file");
+		System.out.println("2. Decompress the file");
+		System.out.println("3. Show huffman code");
+		int option = s.nextInt();
+
+
+		if (option!=2) {
+			//Taking input file and making a frequency map for occurrences of each unique character
+			takeInputFromFile input = new takeInputFromFile();
+			input.takeInput();
+
+
+			char[] alphabets = input.getAlphabets();
+			int[] freq = input.getFreq();
+			try {
+				int n = alphabets.length;
+
+				//Getting huffman tree corresponding to given text in the file
+				HuffmanCode huffmanCode = new HuffmanCode(n, alphabets, freq);
+				HuffManNode huffmanTreeRoot = huffmanCode.createHuffManTree();
+				huffmanCode.putHashMapKeyValue(huffmanTreeRoot, "");
+				HashMap<Character, String> codes = huffmanCode.getHuffManCodeForEachCharacter();
+
+
+				if (option==1) {
+					//Getting text from the input file
+					char[] inputFileContent = input.getFileContent();
+					File inputFile = input.getFile();
+					String path = inputFile.getPath();
+					String[] arr = path.split(".");
+					path = arr[0];
+					File dir = new File(path);
+					dir.mkdir();
+					CompressFile compressFile = new CompressFile(inputFileContent,codes,path,huffmanTreeRoot);
+
+
+					if (compressFile.compress()) {
+						System.out.println("File is compressed successfuly!");
+					
+					}
+				}else {
+					huffmanCode.print(huffmanTreeRoot,"");
+				}
+			}catch(NullPointerException ex) {
+				System.out.println(ex.getMessage());
+			}
+		}
+		else if (option==2){
+			System.out.println("Enter the folder path which you want to unzip: ");
+			String dirPath = s.next();
+			System.out.println();
+
+			String encoded_File_Name = "encoded.txt";
+			String huffManTreeFile = "huffmanTree.txt";
+			
+			String encodedFilePath = dirPath+"/"+encoded_File_Name;
+			String huffManTreeFilePath = dirPath+"/"+huffManTreeFile;
+			
+			String[] arr = dirPath.split("/");
+			String outputPath = "";
+			for(int i=0;i<arr.length-1;i++) {
+				outputPath+=arr[i]+"/";	
+			}
+			outputPath+=arr[arr.length-1];
+			DeCompressFile deCompressFile = new DeCompressFile(encodedFilePath,huffManTreeFilePath,outputPath);
+			if (deCompressFile.decompress()) {
+				System.out.println("File is decoded successfully!");
+			}
+
+
+		}
+
+
+
+	}
+
+
+
+
+}
